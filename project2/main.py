@@ -10,10 +10,10 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras import Model
 su_kaplari=[]
 sivilar=[]
-su_kabi=[[],[],[],[]]
 files=os.listdir('kap/')
 files_1=os.listdir('sivi/')
 print(files[0])
+print(files_1[0])
 veriler=[]
 #for i in range(len(files)):
 for i in range(len(files)):
@@ -24,8 +24,9 @@ for i in range(len(files_1)):
     img1=cv2.imread("sivi/"+files_1[i])
     img1=cv2.resize(img1,(32,32))
     sivilar.append(img1)
-su_kabi = [[su_kaplari[0],sivilar[0]],[su_kaplari[1],sivilar[1]]]
-labels=[1,0]
+su_kap=[su_kaplari[0],su_kaplari[1],su_kaplari[0],su_kaplari[1]]
+sivi=[sivilar[0],sivilar[1],sivilar[1],sivilar[0]]
+labels=[0,1,1,0]
 def oznitelikCikartici(inputer,modelNo):
 
     x = layers.Conv2D(32,(3,3),activation="relu",name=f"{modelNo}_1")(inputer)
@@ -43,7 +44,7 @@ def benzirlikCikartici(inputer):
     x = layers.Dense(128,activation="relu")(inputer)
     #x = layers.Dense(64,activation="relu")(x)
     #x = layers.Dense(32,activation="relu")(x)
-    x = layers.Dense(1,activation="sigmoid")(x)
+    x = layers.Dense(2,activation="sigmoid")(x)
     return x
 
 def mimariDon():
@@ -63,10 +64,16 @@ def mimariDon():
 
 model = mimariDon()
 model.summary()
-model.compile(optimizer="adam",loss="binary_crossentropy",metrics=['accuracy'])
-x=np.array(su_kabi)
+model.compile(optimizer="adam",loss="sparse_categorical_crossentropy",metrics=['accuracy'])
 
-print(x.shape)
-model.fit(x =[np.array(su_kaplari),np.array(sivilar)],y = np.array(labels),batch_size=32,epochs=10,verbose=2)
-model.evaluate((np.array(su_kaplari),np.array(sivilar)),np.array(labels))
-print(model.predict([np.array(su_kaplari[0]).reshape(1,32,32,3),np.array(sivilar[0]).reshape(1,32,32,3)]))
+
+model.fit(x =[np.array(su_kap),np.array(sivi)],y = np.array(labels),batch_size=32,epochs=10,verbose=2)
+model.evaluate((np.array(su_kap),np.array(sivi)),np.array(labels))
+print(model.predict([np.array(su_kap[0]).reshape(1,32,32,3),np.array(sivi[1]).reshape(1,32,32,3)]))
+
+
+"""sparse_categorical_crossentropy loss fonksiyonu kullanılmıştır. kategorik olarak sınıflandırma yapılmıştır.
+Dense çıkışı 2 olarak alınmıştır. Burada mantıksal olarak doğruluk önemli bir noktadır.Yoksa Dense Çıkışı 5 olarakta verilebilir.
+Su kabi ve içine konulan cisimin kabı delip delmeyeceği üzerinde bir çalışılmıştır.
+
+"""
